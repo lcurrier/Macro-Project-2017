@@ -28,13 +28,21 @@ df <- filter(df, cpsid %in% listofpeepswithgoodwages)
 # idk how to do this :( 
 
 #====================
-# Section 2: Creating Columns for Spouse information 
+# Section 2: filtering out everyone besides married heads of houses and spouses
+#====================
+
+df <- df %>%
+  filter(MARST==1) %>%
+  filter(RELATE==101|RELATE==201)
+
+#====================
+# Section 3: Creating Columns for Spouse information 
 #====================
 
 
 
 #====================
-# Section 3: Adjusting wage information for inflation ala 2000
+# Section 4: Adjusting wage information for inflation ala 2000
 #====================
 
 
