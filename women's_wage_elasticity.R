@@ -7,10 +7,10 @@ library(dplyr)
 library(tidyr)
 library(stringr)
 
-setwd("~/Documents/Third Year/second quarter/modern inference/project")
+# for Lindsey:
+# df <- read_csv("/Users/lindsey/Documents/Third\ Year/second\ quarter/dynamic\ modeling/cps_00006.csv")
 
 #====================
-# read data
+# Clean Data
 #====================
 
-df <- read_csv("BestMergedIPUMS.csv")
