@@ -11,7 +11,7 @@ library(stringr)
 # df <- read_csv("/Users/lindsey/Documents/Third\ Year/second\ quarter/dynamic\ modeling/cps_00006.csv")
 
 # for sylvia 
-df <- read_csv("~/Desktop/cps_00006.csv")
+df <- read_csv("~/Desktop/cps_00008.csv")
 colnames(df) <- tolower(colnames(df)) 
 # varriable to be converted 
 df$hourwage <- as.numeric(df$hourwage)
@@ -20,6 +20,15 @@ df$uhrsworkly <- as.numeric(df$uhrsworkly)
 df$wtsupp <- as.numeric(df$wtsupp)
 df$incwage <- as.numeric(df$incwage)
 df$sex <- df$sex - 1 
+df$annualhours <- df$wkswork1*df$uhrsworkly
+df$incomeI <-  as.numeric(as.character(df$ftotval)) - as.numeric(as.character(df$inctot))
+df <- df %>% mutate(metro=ifelse(metro>=3,2,metro))
+df$raceclean <- "other"
+df <- df %>% mutate(raceclean =ifelse(race == 100,"white", raceclean))
+df <- df %>% mutate(raceclean=ifelse(race == 200,"black", raceclean))
+df <- df %>% mutate(raceclean=ifelse( !(race %in% c(000,901, 902)),"hispan", raceclean))
+
+
 #====================
 # Section 1: Creating Subsample of the peeps need 
 #====================
@@ -127,16 +136,22 @@ df$personid <- paste(as.character(df$year), as.character(df$serial),
 
 bebespousedata <- data.frame("personid" = df$personid, 
                              "spouseid" = df$spouseid, "personwage" = df$hourwage, 
-                             "personwage_predicted" = df$hourwage_predicted )
+                             "personwage_predicted" = df$hourwage_predicted, 
+                             "age" = df$age, 
+                             "raceclean" = df$raceclean)
+
 bebespousedata  <- bebespousedata[match(df$personid, bebespousedata$spouseid),]
-
 df$spousewage <- bebespousedata$personwage  # varriable the gives the wage of the spouce 
-df$spousewage_predicted <- bebespousedata$personwage__predicted 
+df$spousewage_predicted <- bebespousedata$personwage_predicted 
+df$spouseage <- bebespousedata$age
+df$spouseraceclean <- bebespousedata$raceclean
+#====================
+# Section 10: Running Basline Regressions 
+#====================
 
-
-
-
-
-
-
+lm(annualhours ~ incomeI + log(hourwage_predicted) + spousewage_predicted
+   + age + age^2 + spouseage + spouseage^2 + factor(metro) +
+     factor(region) + factor(raceclean) + factor(spouseraceclean) +
+     factor(year),
+     data = filter(df, year %in% c(1979,1980, 1981)))
 
