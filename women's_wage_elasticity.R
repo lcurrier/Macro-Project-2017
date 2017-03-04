@@ -87,7 +87,7 @@ df[(df$year == 2010),]$inf <- inflation[[11]]
 df[(df$year == 2011),]$inf <- inflation[[12]]
 
 
-df$hourwage_inf <- df$hourwage*df$inf
+df$hourwage <- df$hourwage*df$inf
 
 #====================
 # Section 6: Matching Spouse Information to Peeps
