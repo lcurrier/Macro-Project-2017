@@ -65,16 +65,6 @@ df <- df %>%
 # 1 dollar in 2000 was this much, 
 
 inflation = c(2.37, 2.09, 1.89, 1.39, 1.32, 1.26, 1.03, 1.00, 0.97, 0.80, 0.79, 0.77)
-names(inflation) <- c(1979, 1980, 1981, 1989, 1990, 1991, 1999, 
-                      2000, 2001, 2009, 2010, 2011)
-df$hourwage_inf <- NA
-start <- proc.time() 
-for (i in (1:nrow(df))){
-  df$hourwage_inf[i] <- df$hourwage[i]*inflation[[as.character(df$year[i])]]
-  print(as.character(i))
-}
-proc.time() - start
-
 
 df[(df$year == 1979),]$inf <- inflation[[1]]
 df[(df$year == 1980),]$inf <- inflation[[2]]
