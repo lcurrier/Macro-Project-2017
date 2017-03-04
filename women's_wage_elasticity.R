@@ -93,14 +93,20 @@ df <- df %>% left_join(newwt) %>%
 #====================
 # Section 7: Imputing wages 
 #====================
-  
+# calcuate wage for the years 79-81 since we cps doesn't provide that
+df <- df %>%
+  mutate(hourwage_calcuated = incwage/(wkswork1*uhrsworkly)) %>%
+  mutate(hourwage = ifelse(is.na(hourwage),hourwage_calcuated,hourwage))
+# note: still some na's because uhrsworkly is na for unemployed people
+
 df <- df %>% mutate(period=ifelse(year<=1981,"79-81",ifelse(year<=1991,"89-91",ifelse(year<=2001,"99-01","09-11")))) %>%
-  mutate(wkswork3 = ifelse(wkswork1<=20,0,1))
+  mutate(wkswork3 = ifelse(wkswork1<=20,0,1)) 
+
 
 # the regression is going to be: 
 # lm(hourwage ~ factor(period) + factor(sex) + factor(wkswork3), df)
 sketchywage <- lm(hourwage ~ factor(period) + factor(sex) + factor(wkswork3), df)
-# but we need a better measure of average hourly wage since hourwage isnt complete
 
 
-
+# wkstat = 50,60 is	Unemployed seeking full-time work, seeking full-time work
+predict(sketchywage,filter(df,wkstat==50|wkstat==60))
