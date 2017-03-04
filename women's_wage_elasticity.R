@@ -14,6 +14,12 @@ library(stringr)
 df <- read_csv("~/Desktop/cps_00006.csv")
 colnames(df) <- tolower(colnames(df)) 
 # varriable to be converted 
+df$hourwage <- as.numeric(df$hourwage)
+df$wkswork1 <- as.numeric(df$wkswork1)
+df$uhrsworkly <- as.numeric(df$uhrsworkly)
+df$wtsupp <- as.numeric(df$wtsupp)
+
+
 
 #====================
 # Section 1: Creating Subsample of the peeps need 
@@ -63,11 +69,17 @@ inflation <- data.frame(year = c(1979, 1980, 1981, 1989, 1990, 1991, 1999,
                                   0.97, 0.80, 0.79, 0.77))
 df$hourwage <- (df$hourwage)
 
+
+
+
+
+
+
 foo <- c(12, 22, 33)
 names(foo) <- c("tic", "tac", "toe")
 foo[["tic"]]
 
-for 
+
 
 #====================
 # Section 6: Adjusting sample weight so every year has the same weight
