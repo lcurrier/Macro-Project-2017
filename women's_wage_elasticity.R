@@ -45,17 +45,6 @@ df <- df %>%
   filter(marst==1) %>%
   filter(relate==101|relate==201)
 
-df$spouseid <- paste(as.character(df$year), as.character(df$serial),
-                     as.character(df$sploc), sep = "")
-df$personid <- paste(as.character(df$year), as.character(df$serial),
-                     as.character(df$pernum), sep = "")
-
-bebespousedata <- data.frame("personid" = df$personid, 
-                             "spouseid" = df$spouseid, "personwage" = df$hourwage)
-bebespousedata  <- bebespousedata[match(df$personid, bebespousedata$spouseid),]
-  
-df$spousewage <- bebespousedata$personwage  # varriable the gives the wage of the spouce 
-
 #====================
 # Section 3: filtering out everyone in the armed forces
 #====================
@@ -65,12 +54,9 @@ df$spousewage <- bebespousedata$personwage  # varriable the gives the wage of th
 #  filter(!(classwkr==26)) 
 
 #====================
-# Section 4: Creating Columns for Spouse information 
+# Section 4: Calculate wages for 1979-81
 #====================
 
-#====================
-# Section 7: Calculate wages for 1979-81
-#====================
 # calcuate wage for the years 79-81 since we cps doesn't provide that
 # also make infinities and NIUs into NAs 
 df <- df %>%
@@ -102,6 +88,22 @@ df[(df$year == 2011),]$inf <- inflation[[12]]
 
 
 df$hourwage_inf <- df$hourwage*df$inf
+
+#====================
+# Section 6: Matching Spouse Information to Peeps
+#====================
+
+df$spouseid <- paste(as.character(df$year), as.character(df$serial),
+                     as.character(df$sploc), sep = "")
+df$personid <- paste(as.character(df$year), as.character(df$serial),
+                     as.character(df$pernum), sep = "")
+
+bebespousedata <- data.frame("personid" = df$personid, 
+                             "spouseid" = df$spouseid, "personwage" = df$hourwage)
+bebespousedata  <- bebespousedata[match(df$personid, bebespousedata$spouseid),]
+
+df$spousewage <- bebespousedata$personwage  # varriable the gives the wage of the spouce 
+
 
 #====================
 # Section 6: Adjusting sample weight so every year has the same weight
