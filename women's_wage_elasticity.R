@@ -11,7 +11,7 @@ library(stringr)
 # df <- read_csv("/Users/lindsey/Documents/Third\ Year/second\ quarter/dynamic\ modeling/cps_00006.csv")
 
 # for sylvia 
-df <- read_csv("~/Desktop/cps_00008.csv")
+df <- read_csv("~/Desktop/cps_00009.csv")
 colnames(df) <- tolower(colnames(df)) 
 # varriable to be converted 
 df$hourwage <- as.numeric(df$hourwage)
@@ -26,7 +26,8 @@ df <- df %>% mutate(metro=ifelse(metro>=3,2,metro))
 df$raceclean <- "other"
 df <- df %>% mutate(raceclean =ifelse(race == 100,"white", raceclean))
 df <- df %>% mutate(raceclean=ifelse(race == 200,"black", raceclean))
-df <- df %>% mutate(raceclean=ifelse( !(race %in% c(000,901, 902)),"hispan", raceclean))
+df <- df %>% mutate(raceclean=ifelse( !(hispan %in% c(000,901, 902)) ,"hispan", raceclean))
+
 
 
 #====================
@@ -149,9 +150,32 @@ df$spouseraceclean <- bebespousedata$raceclean
 # Section 10: Running Basline Regressions 
 #====================
 
-lm(annualhours ~ incomeI + log(hourwage_predicted) + spousewage_predicted
+df$logwage <- log(df$hourwage_predicted + .000001)
+
+mod1 <- lm(annualhours ~ incomeI + logwage + spousewage_predicted
    + age + age^2 + spouseage + spouseage^2 + factor(metro) +
      factor(region) + factor(raceclean) + factor(spouseraceclean) +
-     factor(year),
-     data = filter(df, year %in% c(1979,1980, 1981)))
+     factor(year), data = filter(df, year %in% c(1979,1980, 1981)))
+
+
+mod2 <- lm(annualhours ~ incomeI + logwage + spousewage_predicted
+           + age + age^2 + spouseage + spouseage^2 + factor(metro) +
+             factor(region) + factor(raceclean) + factor(spouseraceclean) +
+             factor(year), data = filter(df, year %in% c(1989,1990, 1991)))
+
+
+mod3 <- lm(annualhours ~ incomeI + logwage + spousewage_predicted
+           + age + age^2 + spouseage + spouseage^2 + factor(metro) +
+             factor(region) + factor(raceclean) + factor(spouseraceclean) +
+             factor(year), data = filter(df, year %in% c(1999,2000, 2001)))
+
+mod4 <- lm(annualhours ~ incomeI + logwage + spousewage_predicted
+           + age + age^2 + spouseage + spouseage^2 + factor(metro) +
+             factor(region) + factor(raceclean) + factor(spouseraceclean) +
+             factor(year), data = filter(df, year %in% c(2009,2010, 2011)))
+
+
+#stargazer(mod1, mod2, mod3, mod4)
+
+
 
