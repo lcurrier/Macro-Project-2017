@@ -68,21 +68,26 @@ inflation = c(2.37, 2.09, 1.89, 1.39, 1.32, 1.26, 1.03, 1.00, 0.97, 0.80, 0.79, 
 names(inflation) <- c(1979, 1980, 1981, 1989, 1990, 1991, 1999, 
                       2000, 2001, 2009, 2010, 2011)
 df$hourwage_inf <- NA
+start <- proc.time() 
 for (i in (1:nrow(df))){
   df$hourwage_inf[i] <- df$hourwage[i]*inflation[[as.character(df$year[i])]]
+  print(as.character(i))
 }
+proc.time() - start
 
 
-
-
-
-
-
-
-foo <- c(12, 22, 33)
-names(foo) <- c("tic", "tac", "toe")
-foo[["tic"]]
-
+df[(df$year == 1979),]$inf <- inflation[[1]]
+df[(df$year == 1980),]$inf <- inflation[[2]]
+df[(df$year == 1981),]$inf <- inflation[[3]]
+df[(df$year == 1989),]$inf <- inflation[[4]]
+df[(df$year == 1990),]$inf <- inflation[[5]]
+df[(df$year == 1991),]$inf <- inflation[[6]]
+df[(df$year == 1999),]$inf <- inflation[[7]]
+df[(df$year == 2000),]$inf <- inflation[[8]]
+df[(df$year == 2001),]$inf <- inflation[[9]]
+df[(df$year == 2009),]$inf <- inflation[[10]]
+df[(df$year == 2010),]$inf <- inflation[[11]]
+df[(df$year == 2011),]$inf <- inflation[[12]]
 
 
 #====================
