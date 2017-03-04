@@ -18,7 +18,7 @@ df$hourwage <- as.numeric(df$hourwage)
 df$wkswork1 <- as.numeric(df$wkswork1)
 df$uhrsworkly <- as.numeric(df$uhrsworkly)
 df$wtsupp <- as.numeric(df$wtsupp)
-
+df$incwage <- as.numeric(df$incwage)
 
 
 #====================
@@ -63,11 +63,15 @@ df <- df %>%
 # Section 5: Adjusting wage information for inflation ala 2000
 #====================
 # 1 dollar in 2000 was this much, 
-inflation <- data.frame(year = c(1979, 1980, 1981, 1989, 1990, 1991, 1999, 
-                                 2000, 2001, 2009, 2010, 2011) ,
-                        price = c(2.37, 2.09, 1.89, 1.39, 1.32, 1.26, 1.03, 1.00, 
-                                  0.97, 0.80, 0.79, 0.77))
-df$hourwage <- (df$hourwage)
+
+inflation = c(2.37, 2.09, 1.89, 1.39, 1.32, 1.26, 1.03, 1.00, 0.97, 0.80, 0.79, 0.77)
+names(inflation) <- c(1979, 1980, 1981, 1989, 1990, 1991, 1999, 
+                      2000, 2001, 2009, 2010, 2011)
+df$hourwage_inf <- NA
+for (i in (1:nrow(df))){
+  df$hourwage_inf[i] <- df$hourwage[i]*inflation[[as.character(df$year[i])]]
+}
+
 
 
 
