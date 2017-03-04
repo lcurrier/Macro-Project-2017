@@ -45,13 +45,24 @@ df <- df %>%
   filter(marst==1) %>%
   filter(relate==101|relate==201)
 
+df$spouseid <- paste(as.character(df$year), as.character(df$serial),
+                     as.character(df$sploc), sep = "")
+df$personid <- paste(as.character(df$year), as.character(df$serial),
+                     as.character(df$pernum), sep = "")
+
+bebespousedata <- data.frame("personid" = df$personid, 
+                             "spouseid" = df$spouseid, "personwage" = df$hourwage)
+bebespousedata  <- bebespousedata[match(df$personid, bebespousedata$spouseid),]
+  
+df$spousewage <- bebespousedata$personwage  # varriable the gives the wage of the spouce 
+
 #====================
 # Section 3: filtering out everyone in the armed forces
 #====================
-
+# sylvia note: jk this messes us up 
 # classwkr=26: Armed forces
-df <- df %>%
-  filter(!(classwkr==26)) 
+#df <- df %>%
+#  filter(!(classwkr==26)) 
 
 #====================
 # Section 4: Creating Columns for Spouse information 
@@ -80,6 +91,7 @@ df[(df$year == 2010),]$inf <- inflation[[11]]
 df[(df$year == 2011),]$inf <- inflation[[12]]
 
 
+df$hourwage_inf <- df$hourwage*df$inf
 
 #====================
 # Section 6: Adjusting sample weight so every year has the same weight
