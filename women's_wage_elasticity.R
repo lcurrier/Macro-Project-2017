@@ -19,8 +19,7 @@ df$wkswork1 <- as.numeric(df$wkswork1)
 df$uhrsworkly <- as.numeric(df$uhrsworkly)
 df$wtsupp <- as.numeric(df$wtsupp)
 df$incwage <- as.numeric(df$incwage)
-
-
+df$sex <- df$sex - 1 
 #====================
 # Section 1: Creating Subsample of the peeps need 
 #====================
@@ -66,6 +65,7 @@ df <- df %>%
 
 inflation = c(2.37, 2.09, 1.89, 1.39, 1.32, 1.26, 1.03, 1.00, 0.97, 0.80, 0.79, 0.77)
 
+df$inf <- NA
 df[(df$year == 1979),]$inf <- inflation[[1]]
 df[(df$year == 1980),]$inf <- inflation[[2]]
 df[(df$year == 1981),]$inf <- inflation[[3]]
@@ -78,6 +78,7 @@ df[(df$year == 2001),]$inf <- inflation[[9]]
 df[(df$year == 2009),]$inf <- inflation[[10]]
 df[(df$year == 2010),]$inf <- inflation[[11]]
 df[(df$year == 2011),]$inf <- inflation[[12]]
+
 
 
 #====================
