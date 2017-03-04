@@ -151,28 +151,34 @@ df$spouseraceclean <- bebespousedata$raceclean
 #====================
 
 df$logwage <- log(df$hourwage_predicted + .000001)
+df$age2 <- df$age^2
+df$spouseage2 <- df$spouseage^2
 
 mod1 <- lm(annualhours ~ incomeI + logwage + spousewage_predicted
-   + age + age^2 + spouseage + spouseage^2 + factor(metro) +
+   + age + age2 + spouseage + spouseage2 + factor(metro) +
      factor(region) + factor(raceclean) + factor(spouseraceclean) +
-     factor(year), data = filter(df, year %in% c(1979,1980, 1981), sex == 1))
+     factor(year), data = filter(df, year %in% c(1979,1980, 1981), sex == 1),
+   weights = wtsupp2)
 
 
 mod2 <- lm(annualhours ~ incomeI + logwage + spousewage_predicted
-           + age + age^2 + spouseage + spouseage^2 + factor(metro) +
+           + age + age2 + spouseage + spouseage2 + factor(metro) +
              factor(region) + factor(raceclean) + factor(spouseraceclean) +
-             factor(year), data = filter(df, year %in% c(1989,1990, 1991), sex == 1))
+             factor(year), data = filter(df, year %in% c(1989,1990, 1991), sex == 1),
+           weights = wtsupp2)
 
 
 mod3 <- lm(annualhours ~ incomeI + logwage + spousewage_predicted
-           + age + age^2 + spouseage + spouseage^2 + factor(metro) +
+           + age + age2 + spouseage + spouseage2 + factor(metro) +
              factor(region) + factor(raceclean) + factor(spouseraceclean) +
-             factor(year), data = filter(df, year %in% c(1999,2000, 2001), sex == 1))
+             factor(year), data = filter(df, year %in% c(1999,2000, 2001), sex == 1), 
+           weights = wtsupp2)
 
 mod4 <- lm(annualhours ~ incomeI + logwage + spousewage_predicted
-           + age + age^2 + spouseage + spouseage^2 + factor(metro) +
+           + age + age2 + spouseage + spouseage2 + factor(metro) +
              factor(region) + factor(raceclean) + factor(spouseraceclean) +
-             factor(year), data = filter(df, year %in% c(2009,2010, 2011), sex == 1))
+             factor(year), data = filter(df, year %in% c(2009,2010, 2011), sex == 1), 
+           weights = wtsupp2)
 
 
 stargazer(mod1, mod2, mod3, mod4)
