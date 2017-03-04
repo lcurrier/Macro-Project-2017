@@ -89,21 +89,6 @@ df[(df$year == 2011),]$inf <- inflation[[12]]
 
 df$hourwage <- df$hourwage*df$inf
 
-#====================
-# Section 6: Matching Spouse Information to Peeps
-#====================
-
-df$spouseid <- paste(as.character(df$year), as.character(df$serial),
-                     as.character(df$sploc), sep = "")
-df$personid <- paste(as.character(df$year), as.character(df$serial),
-                     as.character(df$pernum), sep = "")
-
-bebespousedata <- data.frame("personid" = df$personid, 
-                             "spouseid" = df$spouseid, "personwage" = df$hourwage)
-bebespousedata  <- bebespousedata[match(df$personid, bebespousedata$spouseid),]
-
-df$spousewage <- bebespousedata$personwage  # varriable the gives the wage of the spouce 
-
 
 #====================
 # Section 7: Adjusting sample weight so every year has the same weight
@@ -130,3 +115,28 @@ fit <- lm(hourwage ~ factor(period) + sex + wkswork3, df)
 # predict wages for the everyone with no wages and fill back in 
 df <- df %>% mutate(hourwage_predicted = predict(fit,df)) %>% 
   mutate(hourwage_predicted = ifelse(is.na(hourwage),hourwage_predicted,hourwage))
+
+
+#====================
+# Section 9: Imputing Wages for Spouses 
+#====================
+df$spouseid <- paste(as.character(df$year), as.character(df$serial),
+                     as.character(df$sploc), sep = "")
+df$personid <- paste(as.character(df$year), as.character(df$serial),
+                     as.character(df$pernum), sep = "")
+
+bebespousedata <- data.frame("personid" = df$personid, 
+                             "spouseid" = df$spouseid, "personwage" = df$hourwage, 
+                             "personwage_predicted" = df$hourwage_predicted )
+bebespousedata  <- bebespousedata[match(df$personid, bebespousedata$spouseid),]
+
+df$spousewage <- bebespousedata$personwage  # varriable the gives the wage of the spouce 
+df$spousewage_predicted <- bebespousedata$personwage__predicted 
+
+
+
+
+
+
+
+
