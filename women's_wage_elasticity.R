@@ -106,7 +106,7 @@ df$spousewage <- bebespousedata$personwage  # varriable the gives the wage of th
 
 
 #====================
-# Section 6: Adjusting sample weight so every year has the same weight
+# Section 7: Adjusting sample weight so every year has the same weight
 #====================
 
 newwt <- df %>% group_by(year) %>% 
@@ -129,4 +129,4 @@ fit <- lm(hourwage ~ factor(period) + sex + wkswork3, df)
 
 # predict wages for the everyone with no wages and fill back in 
 df <- df %>% mutate(hourwage_predicted = predict(fit,df)) %>% 
-  mutate(hourwage = ifelse(is.na(hourwage),hourwage_predicted,hourwage))
+  mutate(hourwage_predicted = ifelse(is.na(hourwage),hourwage_predicted,hourwage))
