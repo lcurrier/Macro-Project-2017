@@ -68,6 +68,16 @@ df$spousewage <- bebespousedata$personwage  # varriable the gives the wage of th
 # Section 4: Creating Columns for Spouse information 
 #====================
 
+#====================
+# Section 7: Calculate wages for 1979-81
+#====================
+# calcuate wage for the years 79-81 since we cps doesn't provide that
+# also make infinities and NIUs into NAs 
+df <- df %>%
+  mutate(hourwage_calcuated = incwage/(wkswork1*uhrsworkly)) %>%
+  mutate(hourwage = ifelse(is.na(hourwage),hourwage_calcuated,hourwage)) %>%
+  mutate(hourwage = ifelse(hourwage==Inf|hourwage==99.99,NA,hourwage))
+# note: still some na's because uhrsworkly is na for unemployed people
 
 #====================
 # Section 5: Adjusting wage information for inflation ala 2000
@@ -103,23 +113,18 @@ newwt <- df %>% group_by(year) %>%
 df <- df %>% left_join(newwt) %>%
   mutate(wtsupp2 = scale*as.numeric(wtsupp))
 
-#====================
-# Section 7: Imputing wages 
-#====================
-# calcuate wage for the years 79-81 since we cps doesn't provide that
-df <- df %>%
-  mutate(hourwage_calcuated = incwage/(wkswork1*uhrsworkly)) %>%
-  mutate(hourwage = ifelse(is.na(hourwage),hourwage_calcuated,hourwage))
-# note: still some na's because uhrsworkly is na for unemployed people
 
+#====================
+# Section 8: Imputing wages for non-workers
+#====================
+
+# create variables for regression
 df <- df %>% mutate(period=ifelse(year<=1981,"79-81",ifelse(year<=1991,"89-91",ifelse(year<=2001,"99-01","09-11")))) %>%
   mutate(wkswork3 = ifelse(wkswork1<=20,0,1)) 
 
+# regression for wages  
+fit <- lm(hourwage ~ factor(period) + sex + wkswork3, df)
 
-# the regression is going to be: 
-# lm(hourwage ~ factor(period) + factor(sex) + factor(wkswork3), df)
-sketchywage <- lm(hourwage ~ factor(period) + factor(sex) + factor(wkswork3), df)
-
-
-# wkstat = 50,60 is	Unemployed seeking full-time work, seeking full-time work
-predict(sketchywage,filter(df,wkstat==50|wkstat==60))
+# predict wages for the everyone with no wages and fill back in 
+df <- df %>% mutate(hourwage_predicted = predict(fit,df)) %>% 
+  mutate(hourwage = ifelse(is.na(hourwage),hourwage_predicted,hourwage))
