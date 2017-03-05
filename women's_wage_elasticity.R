@@ -8,7 +8,7 @@ library(tidyr)
 library(stringr)
 
 # for Lindsey:
-# df <- read_csv("/Users/lindsey/Documents/Third\ Year/second\ quarter/dynamic\ modeling/cps_00006.csv")
+# df <- read_csv("/Users/lindsey/Documents/Third\ Year/second\ quarter/dynamic\ modeling/cps_00009.csv")
 
 # for sylvia 
 df <- read_csv("~/Desktop/cps_00009.csv")
@@ -120,7 +120,7 @@ df <- df %>% mutate(period=ifelse(year<=1981,"79-81",ifelse(year<=1991,"89-91",i
   mutate(wkswork3 = ifelse(wkswork1<=20,0,1)) 
 
 # regression for wages  
-fit <- lm(hourwage ~ factor(period) + sex + wkswork3, df)
+fit <- lm(hourwage ~ factor(period) + sex + wkswork3, weights = wtsupp2,df)
 
 # predict wages for the everyone with no wages and fill back in 
 df <- df %>% mutate(hourwage_predicted = predict(fit,df)) %>% 
@@ -154,27 +154,27 @@ df$logwage <- log(df$hourwage_predicted + .000001)
 df$age2 <- df$age^2
 df$spouseage2 <- df$spouseage^2
 
-mod1 <- lm(annualhours ~ incomeI + logwage + spousewage_predicted
+mod1 <- lm(annualhours ~ incomeI + logwage
    + age + age2 + spouseage + spouseage2 + factor(metro) +
      factor(region) + factor(raceclean) + factor(spouseraceclean) +
      factor(year), data = filter(df, year %in% c(1979,1980, 1981), sex == 1),
    weights = wtsupp2)
 
 
-mod2 <- lm(annualhours ~ incomeI + logwage + spousewage_predicted
+mod2 <- lm(annualhours ~ incomeI + logwage 
            + age + age2 + spouseage + spouseage2 + factor(metro) +
              factor(region) + factor(raceclean) + factor(spouseraceclean) +
              factor(year), data = filter(df, year %in% c(1989,1990, 1991), sex == 1),
            weights = wtsupp2)
 
 
-mod3 <- lm(annualhours ~ incomeI + logwage + spousewage_predicted
+mod3 <- lm(annualhours ~ incomeI + logwage 
            + age + age2 + spouseage + spouseage2 + factor(metro) +
              factor(region) + factor(raceclean) + factor(spouseraceclean) +
              factor(year), data = filter(df, year %in% c(1999,2000, 2001), sex == 1), 
            weights = wtsupp2)
 
-mod4 <- lm(annualhours ~ incomeI + logwage + spousewage_predicted
+mod4 <- lm(annualhours ~ incomeI + logwage 
            + age + age2 + spouseage + spouseage2 + factor(metro) +
              factor(region) + factor(raceclean) + factor(spouseraceclean) +
              factor(year), data = filter(df, year %in% c(2009,2010, 2011), sex == 1), 
