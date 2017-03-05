@@ -68,11 +68,11 @@ df <- df %>%
 #====================
 
 # calcuate wage for the years 79-81 since we cps doesn't provide that
-# also make infinities and NIUs into NAs 
+# also make infinities,NIUs,extreme values and self-employed people into NAs 
 df <- df %>%
   mutate(hourwage_calcuated = incwage/(wkswork1*uhrsworkly)) %>%
   mutate(hourwage = ifelse(is.na(hourwage),hourwage_calcuated,hourwage)) %>%
-  mutate(hourwage = ifelse(hourwage==Inf|hourwage==99.99,NA,hourwage))
+  mutate(hourwage = ifelse(hourwage==Inf|hourwage==99.99|hourwage<2|hourwage>200|classwkr==10|classwkr==13|classwkr==14,NA,hourwage))
 # note: still some na's because uhrsworkly is na for unemployed people
 
 #====================
@@ -120,7 +120,7 @@ df <- df %>% mutate(period=ifelse(year<=1981,"79-81",ifelse(year<=1991,"89-91",i
   mutate(wkswork3 = ifelse(wkswork1<=20,0,1)) 
 
 # regression for wages  
-fit <- lm(hourwage ~ factor(period) + sex + wkswork3, weights = wtsupp2,df)
+fit <- lm(hourwage ~ factor(period) + sex + wkswork3,df,weights = wtsupp2)
 
 # predict wages for the everyone with no wages and fill back in 
 df <- df %>% mutate(hourwage_predicted = predict(fit,df)) %>% 
@@ -159,7 +159,6 @@ mod1 <- lm(annualhours ~ incomeI + logwage
      factor(region) + factor(raceclean) + factor(spouseraceclean) +
      factor(year), data = filter(df, year %in% c(1979,1980, 1981), sex == 1),
    weights = wtsupp2)
-
 
 mod2 <- lm(annualhours ~ incomeI + logwage 
            + age + age2 + spouseage + spouseage2 + factor(metro) +
