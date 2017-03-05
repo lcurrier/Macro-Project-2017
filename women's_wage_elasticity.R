@@ -21,7 +21,11 @@ df$wtsupp <- as.numeric(df$wtsupp)
 df$incwage <- as.numeric(df$incwage)
 df$sex <- df$sex - 1 
 df$annualhours <- df$wkswork1*df$uhrsworkly
-df$incomeI <-  as.numeric(as.character(df$ftotval)) - as.numeric(as.character(df$inctot))
+df$incomeI <-  pmax( (pmax(as.numeric(as.character(df$ftotval)), 0) -
+                     pmax(as.numeric(as.character(df$inctot)), 0)), 0)
+
+
+
 df <- df %>% mutate(metro=ifelse(metro>=3,2,metro))
 df$raceclean <- "other"
 df <- df %>% mutate(raceclean =ifelse(race == 100,"white", raceclean))
@@ -145,7 +149,7 @@ bebespousedata  <- bebespousedata[match(df$personid, bebespousedata$spouseid),]
 df$spousewage <- bebespousedata$personwage  # varriable the gives the wage of the spouce 
 df$spousewage_predicted <- bebespousedata$personwage_predicted 
 df$spouseage <- bebespousedata$age
-df$spouseraceclean <- bebespousedata$raceclean
+df$spouseraceclean <- as.character(bebespousedata$raceclean)
 #====================
 # Section 10: Running Basline Regressions 
 #====================
@@ -182,6 +186,9 @@ mod4 <- lm(annualhours ~ incomeI + logwage
 
 
 stargazer(mod1, mod2, mod3, mod4)
+
+
+
 
 
 
