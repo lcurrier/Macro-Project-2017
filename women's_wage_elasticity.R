@@ -16,7 +16,8 @@ colnames(df) <- tolower(colnames(df))
 # varriable to be converted 
 df$hourwage <- as.numeric(df$hourwage)
 df$wkswork1 <- as.numeric(df$wkswork1)
-df$uhrsworkly <- as.numeric(df$uhrsworkly)
+df$uhrsworkly <- as.numeric(as.character(df$uhrsworkly))
+df[(df$uhrsworkly >= 999 & !is.na(df$uhrsworkly)),]$uhrsworkly <- 0
 df$wtsupp <- as.numeric(df$wtsupp)
 df$incwage <- as.numeric(df$incwage)
 df$sex <- df$sex - 1 
@@ -24,14 +25,21 @@ df$annualhours <- df$wkswork1*df$uhrsworkly
 df$incomeI <-  pmax( (pmax(as.numeric(as.character(df$ftotval)), 0) -
                      pmax(as.numeric(as.character(df$inctot)), 0)), 0)
 
-
-
+df$educ_4factor <- 0
+df[(df$educ <= 072),]$educ_4factor <- 1
+df[(072 < df$educ &  df$educ %in% c(73:110, 120:122) ),]$educ_4factor <- 2
+df[(df$educ == 111 ),]$educ_4factor <- 3
+df[(df$educ > 111 ),]$educ_4factor <- 4 # lindsey please check no 999
+df$age2 <- df$age^2
 df <- df %>% mutate(metro=ifelse(metro>=3,2,metro))
 df$raceclean <- "other"
 df <- df %>% mutate(raceclean =ifelse(race == 100,"white", raceclean))
 df <- df %>% mutate(raceclean=ifelse(race == 200,"black", raceclean))
 df <- df %>% mutate(raceclean=ifelse( !(hispan %in% c(000,901, 902)) ,"hispan", raceclean))
 
+df <- df %>% mutate(period=ifelse(year<=1981,"79-81",ifelse(year<=1991,"89-91",ifelse(year<=2001,"99-01","09-11")))) %>%
+  mutate(wkswork3 = ifelse(wkswork1<=20,0,1)) 
+#wksweek3 == 0 when person works less than 20 hours 
 
 
 #====================
@@ -116,23 +124,7 @@ df <- df %>% left_join(newwt) %>%
 
 
 #====================
-# Section 8: Imputing wages for non-workers
-#====================
-
-# create variables for regression
-df <- df %>% mutate(period=ifelse(year<=1981,"79-81",ifelse(year<=1991,"89-91",ifelse(year<=2001,"99-01","09-11")))) %>%
-  mutate(wkswork3 = ifelse(wkswork1<=20,0,1)) 
-
-# regression for wages  
-fit <- lm(hourwage ~ factor(period) + sex + wkswork3,df,weights = wtsupp2)
-
-# predict wages for the everyone with no wages and fill back in 
-df <- df %>% mutate(hourwage_predicted = predict(fit,df)) %>% 
-  mutate(hourwage_predicted = ifelse(is.na(hourwage),hourwage_predicted,hourwage))
-
-
-#====================
-# Section 9: Imputing Wages for Spouses 
+# Section 8: Getting Chars of Spouces  
 #====================
 df$spouseid <- paste(as.character(df$year), as.character(df$serial),
                      as.character(df$sploc), sep = "")
@@ -141,15 +133,155 @@ df$personid <- paste(as.character(df$year), as.character(df$serial),
 
 bebespousedata <- data.frame("personid" = df$personid, 
                              "spouseid" = df$spouseid, "personwage" = df$hourwage, 
-                             "personwage_predicted" = df$hourwage_predicted, 
                              "age" = df$age, 
-                             "raceclean" = df$raceclean)
+                             "raceclean" = df$raceclean,
+                             "educ" = df$educ_4factor, 
+                             "age2" = df$age2)
+
+bebespousedata  <- bebespousedata[match(df$personid, bebespousedata$spouseid),]
+df$spouseage <- bebespousedata$age
+df$spouseage2 <- bebespousedata$age2
+df$spouseraceclean <- as.character(bebespousedata$raceclean)
+df$spouse_educ <- bebespousedata$educ
+
+#====================
+# Section 9: Imputing wages for non-workers
+#====================
+
+#======
+# regression for wages  79_81
+#======
+
+fit79_81_low_fem <- lm(hourwage ~ age + age2 + spouseage + spouseage2 + 
+                         factor(educ_4factor) + factor(spouse_educ) + factor(raceclean) +
+                         factor(spouseraceclean) + factor(region) + factor(metro), 
+                       filter(df, sex == 1, wkswork3 == 0, period == "79-81"),
+                       weights = wtsupp2)
+
+fit79_81_low_man <- lm(hourwage ~ age + age2 + spouseage + spouseage2 + 
+                         factor(educ_4factor) + factor(spouse_educ) + factor(raceclean) +
+                         factor(spouseraceclean) + factor(region) + factor(metro), 
+                       filter(df, sex == 1, wkswork3 == 0, period == "79-81"),
+                       weights = wtsupp2)
+
+fit79_81_high_fem <- lm(hourwage ~ age + age2 + spouseage + spouseage2 + 
+                         factor(educ_4factor) + factor(spouse_educ) + factor(raceclean) +
+                         factor(spouseraceclean) + factor(region) + factor(metro), 
+                       filter(df, sex == 1, wkswork3 == 1, period == "79-81"),
+                       weights = wtsupp2)
+
+fit79_81_high_man <- lm(hourwage ~ age + age2 + spouseage + spouseage2 + 
+                         factor(educ_4factor) + factor(spouse_educ) + factor(raceclean) +
+                         factor(spouseraceclean) + factor(region) + factor(metro), 
+                       filter(df, sex == 1, wkswork3 == 1, period == "79-81"),
+                       weights = wtsupp2)
+
+#======
+# regression for wages  89-91, 89_91
+#======
+fit89_91_low_fem <- lm(hourwage ~ age + age2 + spouseage + spouseage2 + 
+                         factor(educ_4factor) + factor(spouse_educ) + factor(raceclean) +
+                         factor(spouseraceclean) + factor(region) + factor(metro), 
+                       filter(df, sex == 1, wkswork3 == 0, period == "89-91"),
+                       weights = wtsupp2)
+
+fit89_91_low_man <- lm(hourwage ~ age + age2 + spouseage + spouseage2 + 
+                         factor(educ_4factor) + factor(spouse_educ) + factor(raceclean) +
+                         factor(spouseraceclean) + factor(region) + factor(metro), 
+                       filter(df, sex == 1, wkswork3 == 0, period == "89-91"),
+                       weights = wtsupp2)
+
+fit89_91_high_fem <- lm(hourwage ~ age + age2 + spouseage + spouseage2 + 
+                          factor(educ_4factor) + factor(spouse_educ) + factor(raceclean) +
+                          factor(spouseraceclean) + factor(region) + factor(metro), 
+                        filter(df, sex == 1, wkswork3 == 1, period == "89-91"),
+                        weights = wtsupp2)
+
+fit89_91_high_man <- lm(hourwage ~ age + age2 + spouseage + spouseage2 + 
+                          factor(educ_4factor) + factor(spouse_educ) + factor(raceclean) +
+                          factor(spouseraceclean) + factor(region) + factor(metro), 
+                        filter(df, sex == 1, wkswork3 == 1, period == "89-91"),
+                        weights = wtsupp2)
+
+
+#======
+# regression for wages  99-01, 99_01
+#======
+fit99_01_low_fem <- lm(hourwage ~ age + age2 + spouseage + spouseage2 + 
+                         factor(educ_4factor) + factor(spouse_educ) + factor(raceclean) +
+                         factor(spouseraceclean) + factor(region) + factor(metro), 
+                       filter(df, sex == 1, wkswork3 == 0, period == "99-01"),
+                       weights = wtsupp2)
+
+fit99_01_low_man <- lm(hourwage ~ age + age2 + spouseage + spouseage2 + 
+                         factor(educ_4factor) + factor(spouse_educ) + factor(raceclean) +
+                         factor(spouseraceclean) + factor(region) + factor(metro), 
+                       filter(df, sex == 1, wkswork3 == 0, period == "99-01"),
+                       weights = wtsupp2)
+
+fit99_01_high_fem <- lm(hourwage ~ age + age2 + spouseage + spouseage2 + 
+                          factor(educ_4factor) + factor(spouse_educ) + factor(raceclean) +
+                          factor(spouseraceclean) + factor(region) + factor(metro), 
+                        filter(df, sex == 1, wkswork3 == 1, period == "99-01"),
+                        weights = wtsupp2)
+
+fit99_01_high_man <- lm(hourwage ~ age + age2 + spouseage + spouseage2 + 
+                          factor(educ_4factor) + factor(spouse_educ) + factor(raceclean) +
+                          factor(spouseraceclean) + factor(region) + factor(metro), 
+                        filter(df, sex == 1, wkswork3 == 1, period == "99-01"),
+                        weights = wtsupp2)
+
+#======
+# regression for wages  09-11, 09_11
+#======
+fit09_11_low_fem <- lm(hourwage ~ age + age2 + spouseage + spouseage2 + 
+                         factor(educ_4factor) + factor(spouse_educ) + factor(raceclean) +
+                         factor(spouseraceclean) + factor(region) + factor(metro), 
+                       filter(df, sex == 1, wkswork3 == 0, period == "09-11"),
+                       weights = wtsupp2)
+
+fit09_11_low_man <- lm(hourwage ~ age + age2 + spouseage + spouseage2 + 
+                         factor(educ_4factor) + factor(spouse_educ) + factor(raceclean) +
+                         factor(spouseraceclean) + factor(region) + factor(metro), 
+                       filter(df, sex == 1, wkswork3 == 0, period == "09-11"),
+                       weights = wtsupp2)
+
+fit09_11_high_fem <- lm(hourwage ~ age + age2 + spouseage + spouseage2 + 
+                          factor(educ_4factor) + factor(spouse_educ) + factor(raceclean) +
+                          factor(spouseraceclean) + factor(region) + factor(metro), 
+                        filter(df, sex == 1, wkswork3 == 1, period == "09-11"),
+                        weights = wtsupp2)
+
+fit09_11_high_man <- lm(hourwage ~ age + age2 + spouseage + spouseage2 + 
+                          factor(educ_4factor) + factor(spouse_educ) + factor(raceclean) +
+                          factor(spouseraceclean) + factor(region) + factor(metro), 
+                        filter(df, sex == 1, wkswork3 == 1, period == "09-11"),
+                        weights = wtsupp2)
+
+
+#======
+# prediciting 
+#======
+
+# predict wages for the everyone with no wages and fill back in 
+df <- df %>% mutate(hourwage_predicted = predict(fit,df)) %>% 
+  mutate(hourwage_predicted = ifelse(is.na(hourwage),hourwage_predicted,hourwage))
+
+
+
+
+#====================
+# Section 9: Imputing Wages for Spouses 
+#====================
+
+bebespousedata <- data.frame("personid" = df$personid, 
+                             "spouseid" = df$spouseid, "personwage" = df$hourwage, 
+                             "personwage_predicted" = df$hourwage_predicted)
 
 bebespousedata  <- bebespousedata[match(df$personid, bebespousedata$spouseid),]
 df$spousewage <- bebespousedata$personwage  # varriable the gives the wage of the spouce 
 df$spousewage_predicted <- bebespousedata$personwage_predicted 
-df$spouseage <- bebespousedata$age
-df$spouseraceclean <- as.character(bebespousedata$raceclean)
+
 #====================
 # Section 10: Running Basline Regressions 
 #====================
