@@ -32,7 +32,7 @@ df[(df$educ %in% c(73:110, 120:122) ),]$educ_4factor <- 2
 df[(df$educ == 111 ),]$educ_4factor <- 3
 df[(df$educ >= 123 ),]$educ_4factor <- 4
 df$age2 <- df$age^2
-df <- df %>% mutate(metro=ifelse(metro==0|9,1,metro)) 
+df <- df %>% mutate(metro=ifelse(metro==0,1,metro)) 
 df <- df %>% mutate(metro=ifelse(metro>=3,2,metro))
 df$raceclean <- "other"
 df <- df %>% mutate(raceclean =ifelse(race == 100,"white", raceclean))
@@ -134,27 +134,11 @@ df$spouseid <- paste(as.character(df$year), as.character(df$serial),
 df$personid <- paste(as.character(df$year), as.character(df$serial),
                      as.character(df$pernum), sep = "")
 
-bebespousedata <- data.frame("personid" = df$personid, 
-                             "spouseid" = df$spouseid, "personwage" = df$hourwage, 
-                             "age" = df$age, 
-                             "raceclean" = df$raceclean,
-                             "educ" = df$educ_4factor, 
-                             "age2" = df$age2)
-
-bebespousedata  <- bebespousedata[match(df$personid, bebespousedata$spouseid),]
-df$spouseage <- bebespousedata$age
-df$spouseage2 <- bebespousedata$age2
-df$spouseraceclean <- as.character(bebespousedata$raceclean)
-df$spouse_educ <- bebespousedata$educ
-
-### lindsey suggests instead: 
 bebespousedata <- df %>% 
   select(spouseid,hourwage,age,raceclean,educ_4factor,age2) %>%
   rename(spouseage=age,spouseage2=age2,spouseraceclean=raceclean,
-         spouse_educ=educ_4factor,spousewage=hourwage)
+         spouse_educ=educ_4factor)
 df <- left_join(df, bebespousedata, c("personid" = "spouseid"))
-# (produces exactly same result, so whatever really)
-###
 
 #====================
 # Section 9: Imputing wages for non-workers
@@ -378,13 +362,10 @@ sum(is.na(df$hourwage_predicted))
 # Section 9: Imputing Wages for Spouses 
 #====================
 
-bebespousedata <- data.frame("personid" = df$personid, 
-                             "spouseid" = df$spouseid, "personwage" = df$hourwage, 
-                             "personwage_predicted" = df$hourwage_predicted)
-
-bebespousedata  <- bebespousedata[match(df$personid, bebespousedata$spouseid),]
-df$spousewage <- bebespousedata$personwage  # varriable the gives the wage of the spouce 
-df$spousewage_predicted <- bebespousedata$personwage_predicted 
+bebespousedata <- df %>% 
+  select(spouseid,hourwage,hourwage_predicted) %>%
+  rename(spousewage=hourwage,spousewage_predicted=hourwage_predicted)
+df <- left_join(df, bebespousedata, c("personid" = "spouseid"))
 
 #====================
 # Section 10: Running Basline Regressions 
