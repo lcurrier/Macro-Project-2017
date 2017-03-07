@@ -135,10 +135,10 @@ df$personid <- paste(as.character(df$year), as.character(df$serial),
                      as.character(df$pernum), sep = "")
 
 bebespousedata <- df %>% 
-  select(spouseid,hourwage,age,raceclean,educ_4factor,age2) %>%
+  select(spouseid,age,raceclean,educ_4factor,age2) %>%
   rename(spouseage=age,spouseage2=age2,spouseraceclean=raceclean,
          spouse_educ=educ_4factor)
-df <- left_join(df, bebespousedata, c("personid" = "spouseid"))
+df <- left_join(df, bebespousedata, c("personid" = "spouseid")) 
 
 #====================
 # Section 9: Imputing wages for non-workers
