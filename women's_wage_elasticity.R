@@ -376,7 +376,13 @@ df <- left_join(df, bebespousedata, c("personid" = "spouseid"))
 
 
 df$logwage <- log( pmax(df$hourwage_predicted, 0) + .000001)
-df$logwagegroup <- as.numeric(as.factor(cut(df$logwage, 10)))
+df$logwagegroup <- as.numeric(as.factor(
+  cut(df$logwage, breaks = quantile(df$logwage))))
+
+df$logwagegroup  <- as.numeric(as.factor(with(df, cut(df$logwage, 
+                                breaks=quantile(df$logwage, probs=seq(0,1, by=0.1), na.rm=TRUE), 
+                                include.lowest=TRUE))))
+
 
 mod1 <- lm(annualhours ~ incomeI + logwagegroup 
    + age + age2 + spouseage + spouseage2 + factor(metro) +
@@ -384,14 +390,14 @@ mod1 <- lm(annualhours ~ incomeI + logwagegroup
      factor(year), data = filter(df, year %in% c(1979,1980, 1981), sex == 1),
    weights = wtsupp2)
 
-mod2 <- lm(annualhours ~ incomeI + logwagegroup  
+mod2 <- lm(annualhours ~ incomeI + logwagegroup 
            + age + age2 + spouseage + spouseage2 + factor(metro) +
              factor(region) + factor(raceclean) + factor(spouseraceclean) +
              factor(year), data = filter(df, year %in% c(1989,1990, 1991), sex == 1),
            weights = wtsupp2)
 
 
-mod3 <- lm(annualhours ~ incomeI + logwagegroup  
+mod3 <- lm(annualhours ~ incomeI + logwagegroup 
            + age + age2 + spouseage + spouseage2 + factor(metro) +
              factor(region) + factor(raceclean) + factor(spouseraceclean) +
              factor(year), data = filter(df, year %in% c(1999,2000, 2001), sex == 1), 
