@@ -188,7 +188,7 @@ fit89_91_low_fem <- lm(hourwage ~ age + age2 + spouseage + spouseage2 +
 fit89_91_low_man <- lm(hourwage ~ age + age2 + spouseage + spouseage2 + 
                          factor(educ_4factor) + factor(spouse_educ) + factor(raceclean) +
                          factor(spouseraceclean) + factor(region) + factor(metro), 
-                       filter(df, sex == 1, wkswork3 == 0, period == "89-91"),
+                       filter(df, sex == 0, wkswork3 == 0, period == "89-91"),
                        weights = wtsupp2)
 
 fit89_91_high_fem <- lm(hourwage ~ age + age2 + spouseage + spouseage2 + 
@@ -200,7 +200,7 @@ fit89_91_high_fem <- lm(hourwage ~ age + age2 + spouseage + spouseage2 +
 fit89_91_high_man <- lm(hourwage ~ age + age2 + spouseage + spouseage2 + 
                           factor(educ_4factor) + factor(spouse_educ) + factor(raceclean) +
                           factor(spouseraceclean) + factor(region) + factor(metro), 
-                        filter(df, sex == 1, wkswork3 == 1, period == "89-91"),
+                        filter(df, sex == 0, wkswork3 == 1, period == "89-91"),
                         weights = wtsupp2)
 
 
@@ -216,7 +216,7 @@ fit99_01_low_fem <- lm(hourwage ~ age + age2 + spouseage + spouseage2 +
 fit99_01_low_man <- lm(hourwage ~ age + age2 + spouseage + spouseage2 + 
                          factor(educ_4factor) + factor(spouse_educ) + factor(raceclean) +
                          factor(spouseraceclean) + factor(region) + factor(metro), 
-                       filter(df, sex == 1, wkswork3 == 0, period == "99-01"),
+                       filter(df, sex == 0, wkswork3 == 0, period == "99-01"),
                        weights = wtsupp2)
 
 fit99_01_high_fem <- lm(hourwage ~ age + age2 + spouseage + spouseage2 + 
@@ -228,7 +228,7 @@ fit99_01_high_fem <- lm(hourwage ~ age + age2 + spouseage + spouseage2 +
 fit99_01_high_man <- lm(hourwage ~ age + age2 + spouseage + spouseage2 + 
                           factor(educ_4factor) + factor(spouse_educ) + factor(raceclean) +
                           factor(spouseraceclean) + factor(region) + factor(metro), 
-                        filter(df, sex == 1, wkswork3 == 1, period == "99-01"),
+                        filter(df, sex == 0, wkswork3 == 1, period == "99-01"),
                         weights = wtsupp2)
 
 #======
@@ -243,7 +243,7 @@ fit09_11_low_fem <- lm(hourwage ~ age + age2 + spouseage + spouseage2 +
 fit09_11_low_man <- lm(hourwage ~ age + age2 + spouseage + spouseage2 + 
                          factor(educ_4factor) + factor(spouse_educ) + factor(raceclean) +
                          factor(spouseraceclean) + factor(region) + factor(metro), 
-                       filter(df, sex == 1, wkswork3 == 0, period == "09-11"),
+                       filter(df, sex == 0, wkswork3 == 0, period == "09-11"),
                        weights = wtsupp2)
 
 fit09_11_high_fem <- lm(hourwage ~ age + age2 + spouseage + spouseage2 + 
@@ -255,7 +255,7 @@ fit09_11_high_fem <- lm(hourwage ~ age + age2 + spouseage + spouseage2 +
 fit09_11_high_man <- lm(hourwage ~ age + age2 + spouseage + spouseage2 + 
                           factor(educ_4factor) + factor(spouse_educ) + factor(raceclean) +
                           factor(spouseraceclean) + factor(region) + factor(metro), 
-                        filter(df, sex == 1, wkswork3 == 1, period == "09-11"),
+                        filter(df, sex == 0, wkswork3 == 1, period == "09-11"),
                         weights = wtsupp2)
 
 
