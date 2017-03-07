@@ -383,27 +383,28 @@ df$spousewage_predicted <- bebespousedata$personwage_predicted
 
 
 df$logwage <- log( pmax(df$hourwage_predicted, 0) + .000001)
+df$logwagegroup <- as.numeric(as.factor(cut(df$logwage, 10)))
 
-mod1 <- lm(annualhours ~ incomeI + logwage
+mod1 <- lm(annualhours ~ incomeI + logwagegroup 
    + age + age2 + spouseage + spouseage2 + factor(metro) +
      factor(region) + factor(raceclean) + factor(spouseraceclean) +
      factor(year), data = filter(df, year %in% c(1979,1980, 1981), sex == 1),
    weights = wtsupp2)
 
-mod2 <- lm(annualhours ~ incomeI + logwage 
+mod2 <- lm(annualhours ~ incomeI + logwagegroup  
            + age + age2 + spouseage + spouseage2 + factor(metro) +
              factor(region) + factor(raceclean) + factor(spouseraceclean) +
              factor(year), data = filter(df, year %in% c(1989,1990, 1991), sex == 1),
            weights = wtsupp2)
 
 
-mod3 <- lm(annualhours ~ incomeI + logwage 
+mod3 <- lm(annualhours ~ incomeI + logwagegroup  
            + age + age2 + spouseage + spouseage2 + factor(metro) +
              factor(region) + factor(raceclean) + factor(spouseraceclean) +
              factor(year), data = filter(df, year %in% c(1999,2000, 2001), sex == 1), 
            weights = wtsupp2)
 
-mod4 <- lm(annualhours ~ incomeI + logwage 
+mod4 <- lm(annualhours ~ incomeI + logwagegroup  
            + age + age2 + spouseage + spouseage2 + factor(metro) +
              factor(region) + factor(raceclean) + factor(spouseraceclean) +
              factor(year), data = filter(df, year %in% c(2009,2010, 2011), sex == 1), 
@@ -411,6 +412,25 @@ mod4 <- lm(annualhours ~ incomeI + logwage
 
 
 stargazer(mod1, mod2, mod3, mod4)
+
+mean(df[(df$period == "79-81" & df$sex == 1 ),]$annualhours)
+mean(df[(df$period == "89-91" & df$sex == 1 ),]$annualhours)
+mean(df[(df$period == "99-01" & df$sex == 1 ),]$annualhours)
+mean(df[(df$period == "09-11" & df$sex == 1 ),]$annualhours)
+
+
+
+plot( df[(df$period == "79-81"),]$hourwage_predicted,df[(df$period == "79-81"),]$hourwage )
+
+max( df[(df$period == "79-81"),]$hourwage_predicted)
+max(df[(df$period == "79-81"),]$hourwage, na.rm = T )
+sum(df[(df$period == "79-81"),]$hourwage > 30, na.rm = T)
+
+
+max( df[(df$period == "09-11"),]$hourwage_predicted)
+max(df[(df$period == "09-11"),]$hourwage, na.rm = T )
+sum(df[(df$period == "09-11"),]$hourwage > 30, na.rm = T)
+
 
 hist(df[(df$period == "79-81"),]$hourwage_predicted)
 hist(df[(df$period == "09-11"),]$hourwage_predicted)
