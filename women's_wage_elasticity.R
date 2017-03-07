@@ -358,6 +358,9 @@ df[(df$sex == 0 & df$wkswork3 == 1 &
 
 sum(is.na(df$hourwage_predicted))
 
+df <- df %>%
+  mutate(hourwage_predicted = ifelse(is.na(hourwage),hourwage_predicted,hourwage))
+
 #====================
 # Section 9: Imputing Wages for Spouses 
 #====================
