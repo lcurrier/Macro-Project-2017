@@ -6,6 +6,7 @@ library(readr)
 library(dplyr)
 library(tidyr)
 library(stringr)
+library(stargazer)
 
 # for Lindsey:
 # df <- read_csv("/Users/lindsey/Documents/Third\ Year/second\ quarter/dynamic\ modeling/cps_00009.csv")
@@ -32,14 +33,15 @@ df[(df$educ == 111 ),]$educ_4factor <- 3
 df[(df$educ > 111 ),]$educ_4factor <- 4 # lindsey please check no 999
 df$age2 <- df$age^2
 df <- df %>% mutate(metro=ifelse(metro>=3,2,metro))
+df <- df %>% mutate(metro=ifelse(metro==0,1,metro))
 df$raceclean <- "other"
 df <- df %>% mutate(raceclean =ifelse(race == 100,"white", raceclean))
 df <- df %>% mutate(raceclean=ifelse(race == 200,"black", raceclean))
 df <- df %>% mutate(raceclean=ifelse( !(hispan %in% c(000,901, 902)) ,"hispan", raceclean))
 
 df <- df %>% mutate(period=ifelse(year<=1981,"79-81",ifelse(year<=1991,"89-91",ifelse(year<=2001,"99-01","09-11")))) %>%
-  mutate(wkswork3 = ifelse(wkswork1<=20,0,1)) 
-#wksweek3 == 0 when person works less than 20 hours 
+  mutate(wkswork3 = ifelse(uhrsworkly<=20,0,1)) 
+#wksweek3 == 0 when person works less than 20 hours per week
 
 
 #====================
@@ -84,7 +86,7 @@ df <- df %>%
 df <- df %>%
   mutate(hourwage_calcuated = incwage/(wkswork1*uhrsworkly)) %>%
   mutate(hourwage = ifelse(is.na(hourwage),hourwage_calcuated,hourwage)) %>%
-  mutate(hourwage = ifelse(hourwage==Inf|hourwage==99.99|hourwage<2|hourwage>200|classwkr==10|classwkr==13|classwkr==14,NA,hourwage))
+  mutate(hourwage = ifelse(hourwage==Inf|hourwage==99.99|classwkr==10|classwkr==13|classwkr==14,NA,hourwage))
 # note: still some na's because uhrsworkly is na for unemployed people
 
 #====================
@@ -111,7 +113,8 @@ df[(df$year == 2011),]$inf <- inflation[[12]]
 
 df$hourwage <- df$hourwage*df$inf
 
-
+# remove extreme/unlikely wages
+df <- df %>% mutate(hourwage = ifelse(hourwage<2|hourwage>200,NA,hourwage))
 #====================
 # Section 7: Adjusting sample weight so every year has the same weight
 #====================
@@ -262,13 +265,105 @@ fit09_11_high_man <- lm(hourwage ~ age + age2 + spouseage + spouseage2 +
 #======
 # prediciting 
 #======
+df$hourwage_predicted <- NA
 
 # predict wages for the everyone with no wages and fill back in 
-df <- df %>% mutate(hourwage_predicted = predict(fit,df)) %>% 
-  mutate(hourwage_predicted = ifelse(is.na(hourwage),hourwage_predicted,hourwage))
+
+#======
+# predict 79_81
+#======
+df[(df$sex == 1 & df$wkswork3 == 0 &
+      df$period == "79-81"),]$hourwage_predicted <- predict(fit79_81_low_fem, 
+                 df[(df$sex == 1 & df$wkswork3 == 0 & df$period == "79-81"),] ) 
+
+
+df[(df$sex == 0 & df$wkswork3 == 0 &
+      df$period == "79-81"),]$hourwage_predicted <- predict(fit79_81_low_man, 
+                 df[(df$sex == 0 & df$wkswork3 == 0 & df$period == "79-81"),] ) 
+
+
+df[(df$sex == 1 & df$wkswork3 == 1 &
+      df$period == "79-81"),]$hourwage_predicted <- predict(fit79_81_high_fem, 
+                df[(df$sex == 1 & df$wkswork3 == 1 & df$period == "79-81"),] ) 
+
+
+df[(df$sex == 0 & df$wkswork3 == 1 &
+      df$period == "79-81"),]$hourwage_predicted <- predict(fit79_81_high_man, 
+                    df[(df$sex == 0 & df$wkswork3 == 1 & df$period == "79-81"),] ) 
+
+
+#======
+# predict 89-91, 89_91
+#======
+
+df[(df$sex == 1 & df$wkswork3 == 0 &
+      df$period == "89-91"),]$hourwage_predicted <- predict(fit89_91_low_fem, 
+                 df[(df$sex == 1 & df$wkswork3 == 0 & df$period == "89-91"),] ) 
+
+
+df[(df$sex == 0 & df$wkswork3 == 0 &
+      df$period == "89-91"),]$hourwage_predicted <- predict(fit89_91_low_man, 
+                df[(df$sex == 0 & df$wkswork3 == 0 & df$period == "89-91"),] ) 
+
+
+df[(df$sex == 1 & df$wkswork3 == 1 &
+      df$period == "89-91"),]$hourwage_predicted <- predict(fit89_91_high_fem, 
+            df[(df$sex == 1 & df$wkswork3 == 1 & df$period == "89-91"),] ) 
+
+
+df[(df$sex == 0 & df$wkswork3 == 1 &
+      df$period == "89-91"),]$hourwage_predicted <- predict(fit89_91_high_man, 
+          df[(df$sex == 0 & df$wkswork3 == 1 & df$period == "89-91"),] ) 
 
 
 
+#======
+# predict 99-01, 99_01
+#======
+df[(df$sex == 1 & df$wkswork3 == 0 &
+      df$period == "99-01"),]$hourwage_predicted <- predict(fit99_01_low_fem, 
+      df[(df$sex == 1 & df$wkswork3 == 0 & df$period == "99-01"),] ) 
+
+
+df[(df$sex == 0 & df$wkswork3 == 0 &
+      df$period == "99-01"),]$hourwage_predicted <- predict(fit99_01_low_man, 
+      df[(df$sex == 0 & df$wkswork3 == 0 & df$period == "99-01"),] ) 
+
+
+df[(df$sex == 1 & df$wkswork3 == 1 &
+      df$period == "99-01"),]$hourwage_predicted <- predict(fit99_01_high_fem, 
+      df[(df$sex == 1 & df$wkswork3 == 1 & df$period == "99-01"),] ) 
+
+
+df[(df$sex == 0 & df$wkswork3 == 1 &
+      df$period == "99-01"),]$hourwage_predicted <- predict(fit99_01_high_man, 
+      df[(df$sex == 0 & df$wkswork3 == 1 & df$period == "99-01"),] ) 
+
+#======
+# predict 09-11, 09_11
+#======
+
+df[(df$sex == 1 & df$wkswork3 == 0 &
+      df$period == "09-11"),]$hourwage_predicted <- predict(fit09_11_low_fem, 
+      df[(df$sex == 1 & df$wkswork3 == 0 & df$period == "09-11"),] ) 
+
+
+df[(df$sex == 0 & df$wkswork3 == 0 &
+      df$period == "09-11"),]$hourwage_predicted <- predict(fit09_11_low_man, 
+      df[(df$sex == 0 & df$wkswork3 == 0 & df$period == "09-11"),] ) 
+
+
+df[(df$sex == 1 & df$wkswork3 == 1 &
+      df$period == "09-11"),]$hourwage_predicted <- predict(fit09_11_high_fem, 
+       df[(df$sex == 1 & df$wkswork3 == 1 & df$period == "09-11"),] ) 
+
+
+df[(df$sex == 0 & df$wkswork3 == 1 &
+      df$period == "09-11"),]$hourwage_predicted <- predict(fit09_11_high_man, 
+        df[(df$sex == 0 & df$wkswork3 == 1 & df$period == "09-11"),] ) 
+
+
+sum(is.na(df$hourwage_predicted))
 
 #====================
 # Section 9: Imputing Wages for Spouses 
@@ -286,9 +381,8 @@ df$spousewage_predicted <- bebespousedata$personwage_predicted
 # Section 10: Running Basline Regressions 
 #====================
 
-df$logwage <- log(df$hourwage_predicted + .000001)
-df$age2 <- df$age^2
-df$spouseage2 <- df$spouseage^2
+
+df$logwage <- log( pmax(df$hourwage_predicted, 0) + .000001)
 
 mod1 <- lm(annualhours ~ incomeI + logwage
    + age + age2 + spouseage + spouseage2 + factor(metro) +
@@ -318,8 +412,11 @@ mod4 <- lm(annualhours ~ incomeI + logwage
 
 stargazer(mod1, mod2, mod3, mod4)
 
+hist(df[(df$period == "79-81"),]$hourwage_predicted)
+hist(df[(df$period == "09-11"),]$hourwage_predicted)
 
-
+max(df[(df$period == "79-81"),]$hourwage, na.rm = T)
+hist(df[(df$period == "09-11"),]$hourwage_predicted)
 
 
 
