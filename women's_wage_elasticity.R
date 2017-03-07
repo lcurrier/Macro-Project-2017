@@ -28,12 +28,12 @@ df$incomeI <-  pmax( (pmax(as.numeric(as.character(df$ftotval)), 0) -
 
 df$educ_4factor <- 0
 df[(df$educ <= 072),]$educ_4factor <- 1
-df[(072 < df$educ &  df$educ %in% c(73:110, 120:122) ),]$educ_4factor <- 2
+df[(df$educ %in% c(73:110, 120:122) ),]$educ_4factor <- 2 
 df[(df$educ == 111 ),]$educ_4factor <- 3
-df[(df$educ > 111 ),]$educ_4factor <- 4 # lindsey please check no 999
+df[(df$educ >= 123 ),]$educ_4factor <- 4
 df$age2 <- df$age^2
+df <- df %>% mutate(metro=ifelse(metro==0|9,1,metro)) 
 df <- df %>% mutate(metro=ifelse(metro>=3,2,metro))
-df <- df %>% mutate(metro=ifelse(metro==0,1,metro))
 df$raceclean <- "other"
 df <- df %>% mutate(raceclean =ifelse(race == 100,"white", raceclean))
 df <- df %>% mutate(raceclean=ifelse(race == 200,"black", raceclean))
@@ -147,6 +147,15 @@ df$spouseage2 <- bebespousedata$age2
 df$spouseraceclean <- as.character(bebespousedata$raceclean)
 df$spouse_educ <- bebespousedata$educ
 
+### lindsey suggests instead: 
+bebespousedata <- df %>% 
+  select(spouseid,hourwage,age,raceclean,educ_4factor,age2) %>%
+  rename(spouseage=age,spouseage2=age2,spouseraceclean=raceclean,
+         spouse_educ=educ_4factor,spousewage=hourwage)
+df <- left_join(df, bebespousedata, c("personid" = "spouseid"))
+# (produces exactly same result, so whatever really)
+###
+
 #====================
 # Section 9: Imputing wages for non-workers
 #====================
@@ -164,7 +173,7 @@ fit79_81_low_fem <- lm(hourwage ~ age + age2 + spouseage + spouseage2 +
 fit79_81_low_man <- lm(hourwage ~ age + age2 + spouseage + spouseage2 + 
                          factor(educ_4factor) + factor(spouse_educ) + factor(raceclean) +
                          factor(spouseraceclean) + factor(region) + factor(metro), 
-                       filter(df, sex == 1, wkswork3 == 0, period == "79-81"),
+                       filter(df, sex == 0, wkswork3 == 0, period == "79-81"),
                        weights = wtsupp2)
 
 fit79_81_high_fem <- lm(hourwage ~ age + age2 + spouseage + spouseage2 + 
@@ -176,7 +185,7 @@ fit79_81_high_fem <- lm(hourwage ~ age + age2 + spouseage + spouseage2 +
 fit79_81_high_man <- lm(hourwage ~ age + age2 + spouseage + spouseage2 + 
                          factor(educ_4factor) + factor(spouse_educ) + factor(raceclean) +
                          factor(spouseraceclean) + factor(region) + factor(metro), 
-                       filter(df, sex == 1, wkswork3 == 1, period == "79-81"),
+                       filter(df, sex == 0, wkswork3 == 1, period == "79-81"),
                        weights = wtsupp2)
 
 #======
