@@ -384,26 +384,29 @@ df$logwagegroup  <- as.numeric(as.factor(with(df, cut(df$logwage,
                                 include.lowest=TRUE))))
 
 
-mod1 <- lm(annualhours ~ incomeI + logwagegroup 
+mod1 <- lm(annualhours ~ incomeI + logwage +  factor(logwagegroup) +  
    + age + age2 + spouseage + spouseage2 + factor(metro) +
      factor(region) + factor(raceclean) + factor(spouseraceclean) +
      factor(year), data = filter(df, year %in% c(1979,1980, 1981), sex == 1),
    weights = wtsupp2)
 
-mod2 <- lm(annualhours ~ incomeI + logwagegroup 
+
+
+
+mod2 <- lm(annualhours ~ incomeI +  logwage +  factor(logwagegroup) + 
            + age + age2 + spouseage + spouseage2 + factor(metro) +
              factor(region) + factor(raceclean) + factor(spouseraceclean) +
              factor(year), data = filter(df, year %in% c(1989,1990, 1991), sex == 1),
            weights = wtsupp2)
 
 
-mod3 <- lm(annualhours ~ incomeI + logwagegroup 
+mod3 <- lm(annualhours ~ incomeI +  logwage +  factor(logwagegroup) + 
            + age + age2 + spouseage + spouseage2 + factor(metro) +
              factor(region) + factor(raceclean) + factor(spouseraceclean) +
              factor(year), data = filter(df, year %in% c(1999,2000, 2001), sex == 1), 
            weights = wtsupp2)
 
-mod4 <- lm(annualhours ~ incomeI + logwagegroup  
+mod4 <- lm(annualhours ~ incomeI + logwage +  factor(logwagegroup) + 
            + age + age2 + spouseage + spouseage2 + factor(metro) +
              factor(region) + factor(raceclean) + factor(spouseraceclean) +
              factor(year), data = filter(df, year %in% c(2009,2010, 2011), sex == 1), 
@@ -411,6 +414,61 @@ mod4 <- lm(annualhours ~ incomeI + logwagegroup
 
 
 stargazer(mod1, mod2, mod3, mod4)
+
+
+
+myivobject1 = ivreg(annualhours ~ logwage + incomeI + age + age2 + spouseage + spouseage2 + factor(metro) +
+                      factor(region) + factor(raceclean) + factor(spouseraceclean) +
+                      factor(year)  |
+                      incomeI + age + age2 + spouseage + spouseage2 + factor(metro) +
+                      factor(region) + factor(raceclean) + factor(spouseraceclean) +
+                      factor(year) + factor(logwagegroup) + factor(educ_4factor) + 
+                      factor(spouse_educ), 
+                    data = filter(df, year %in% c(1979,1980, 1981), sex == 1),
+                    weights = wtsupp2)
+
+myivobject2 = ivreg(annualhours ~ logwage + incomeI + age + age2 + spouseage + spouseage2 + factor(metro) +
+                      factor(region) + factor(raceclean) + factor(spouseraceclean) +
+                      factor(year)   |
+                      incomeI + age + age2 + spouseage + spouseage2 + factor(metro) +
+                      factor(region) + factor(raceclean) + factor(spouseraceclean) +
+                      factor(year) + factor(logwagegroup) + factor(educ_4factor) + 
+                      factor(spouse_educ),
+                    data = filter(df, year %in% c(1989,1990, 1991), sex == 1),
+                    weights = wtsupp2)
+
+
+
+myivobject3 = ivreg(annualhours ~logwage + incomeI + age + age2 + spouseage + spouseage2 + factor(metro) +
+                      factor(region) + factor(raceclean) + factor(spouseraceclean) +
+                      factor(year)  |
+                      incomeI + age + age2 + spouseage + spouseage2 + factor(metro) +
+                      factor(region) + factor(raceclean) + factor(spouseraceclean) +
+                      factor(year) + factor(logwagegroup) + factor(educ_4factor) + 
+                      factor(spouse_educ), 
+                    data = filter(df, year %in% c(1999,2000, 2001), sex == 1),
+                    weights = wtsupp2)
+
+myivobject4 = ivreg(annualhours ~ logwage + incomeI + age + age2 + spouseage + spouseage2 
+                    + factor(metro) +
+                      factor(region) + factor(raceclean) + factor(spouseraceclean) +
+                      factor(year)  |
+                      incomeI + age + age2 + spouseage + spouseage2 + factor(metro) +
+                      factor(region) + factor(raceclean) + factor(spouseraceclean) +
+                      factor(year) + factor(logwagegroup) + factor(educ_4factor) + 
+                      factor(spouse_educ), 
+                    data = filter(df, year %in% c(2009,2010, 2011), sex == 1),
+                    weights = wtsupp2)
+
+
+
+
+stargazer(myivobject1, myivobject2, myivobject3, myivobject4)
+
+
+
+
+
 
 mean(df[(df$period == "79-81" & df$sex == 1 ),]$annualhours)
 mean(df[(df$period == "89-91" & df$sex == 1 ),]$annualhours)
