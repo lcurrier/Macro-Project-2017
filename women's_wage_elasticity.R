@@ -373,15 +373,20 @@ df <- left_join(df, bebespousedata, c("personid" = "spouseid"))
 #====================
 # Section 10: Running Basline Regressions 
 #====================
-
+df$incomeItest <- df$incomeI - pmax(df$spousewage_predicted, 0)
 
 df$logwage <- log( pmax(df$hourwage_predicted, 0) + .000001)
-df$logwagegroup <- as.numeric(as.factor(
-  cut(df$logwage, breaks = quantile(df$logwage))))
+df$spouselogwage <- log( pmax(df$spousewage_predicted, 0) + .000001)
+
 
 df$logwagegroup  <- as.numeric(as.factor(with(df, cut(df$logwage, 
                                 breaks=quantile(df$logwage, probs=seq(0,1, by=0.1), na.rm=TRUE), 
                                 include.lowest=TRUE))))
+
+df$spouselogwagegroup  <- as.numeric(as.factor(with(df, cut(df$spouselogwage , 
+                          breaks=quantile(df$spouselogwage, probs=seq(0,1, by=0.1), na.rm=TRUE), 
+                          include.lowest=TRUE))))
+
 
 
 mod1 <- lm(annualhours ~ incomeI + logwage +  factor(logwagegroup) +  
@@ -417,51 +422,63 @@ stargazer(mod1, mod2, mod3, mod4)
 
 
 
-myivobject1 = ivreg(annualhours ~ logwage + incomeI + age + age2 + spouseage + spouseage2 + factor(metro) +
+myivobject1 = ivreg(annualhours ~ logwage + 
+                      spouselogwage  + incomeItest +
+                      #incomeI +
+                      age + age2 + spouseage + 
+                      spouseage2 + factor(metro) + factor(region) + factor(raceclean) + 
+                      factor(spouseraceclean) + factor(year)  | incomeItest +
+                      age + age2 + spouseage + spouseage2 + factor(metro) +
                       factor(region) + factor(raceclean) + factor(spouseraceclean) +
-                      factor(year)  |
-                      incomeI + age + age2 + spouseage + spouseage2 + factor(metro) +
-                      factor(region) + factor(raceclean) + factor(spouseraceclean) +
-                      factor(year) + factor(logwagegroup) + factor(educ_4factor) + 
-                      factor(spouse_educ), 
+                      factor(year) + factor(logwagegroup) + factor(educ_4factor)  
+                        + factor(spouse_educ) + factor(spouselogwagegroup)
+                      , 
                     data = filter(df, year %in% c(1979,1980, 1981), sex == 1),
                     weights = wtsupp2)
 
-myivobject2 = ivreg(annualhours ~ logwage + incomeI + age + age2 + spouseage + spouseage2 + factor(metro) +
+myivobject2 = ivreg(annualhours ~ logwage + 
+                      spouselogwage  + incomeItest +
+                    #incomeI +
+                    age + age2 + spouseage + 
+                      spouseage2 + factor(metro) + factor(region) + factor(raceclean) + 
+                      factor(spouseraceclean) + factor(year)  | incomeItest +
+                      age + age2 + spouseage + spouseage2 + factor(metro) +
                       factor(region) + factor(raceclean) + factor(spouseraceclean) +
-                      factor(year)   |
-                      incomeI + age + age2 + spouseage + spouseage2 + factor(metro) +
-                      factor(region) + factor(raceclean) + factor(spouseraceclean) +
-                      factor(year) + factor(logwagegroup) + factor(educ_4factor) + 
-                      factor(spouse_educ),
+                      factor(year) + factor(logwagegroup) + factor(educ_4factor)  
+                    + factor(spouse_educ) + factor(spouselogwagegroup)
+                    , 
                     data = filter(df, year %in% c(1989,1990, 1991), sex == 1),
                     weights = wtsupp2)
 
 
 
-myivobject3 = ivreg(annualhours ~logwage + incomeI + age + age2 + spouseage + spouseage2 + factor(metro) +
-                      factor(region) + factor(raceclean) + factor(spouseraceclean) +
-                      factor(year)  |
-                      incomeI + age + age2 + spouseage + spouseage2 + factor(metro) +
-                      factor(region) + factor(raceclean) + factor(spouseraceclean) +
-                      factor(year) + factor(logwagegroup) + factor(educ_4factor) + 
-                      factor(spouse_educ), 
+myivobject3 =  ivreg(annualhours ~ logwage + 
+                       spouselogwage  + incomeItest+
+                     #incomeI +
+                     age + age2 + spouseage + 
+                       spouseage2 + factor(metro) + factor(region) + factor(raceclean) + 
+                       factor(spouseraceclean) + factor(year)  | incomeItest +
+                       age + age2 + spouseage + spouseage2 + factor(metro) +
+                       factor(region) + factor(raceclean) + factor(spouseraceclean) +
+                       factor(year) + factor(logwagegroup) + factor(educ_4factor)  
+                     + factor(spouse_educ) + factor(spouselogwagegroup)
+                     , 
                     data = filter(df, year %in% c(1999,2000, 2001), sex == 1),
                     weights = wtsupp2)
 
-myivobject4 = ivreg(annualhours ~ logwage + incomeI + age + age2 + spouseage + spouseage2 
-                    + factor(metro) +
-                      factor(region) + factor(raceclean) + factor(spouseraceclean) +
-                      factor(year)  |
-                      incomeI + age + age2 + spouseage + spouseage2 + factor(metro) +
-                      factor(region) + factor(raceclean) + factor(spouseraceclean) +
-                      factor(year) + factor(logwagegroup) + factor(educ_4factor) + 
-                      factor(spouse_educ), 
+myivobject4 =  ivreg(annualhours ~ logwage + 
+                       spouselogwage  + incomeItest +
+                     #incomeI +
+                     age + age2 + spouseage + 
+                       spouseage2 + factor(metro) + factor(region) + factor(raceclean) + 
+                       factor(spouseraceclean) + factor(year)  | incomeItest +
+                       age + age2 + spouseage + spouseage2 + factor(metro) +
+                       factor(region) + factor(raceclean) + factor(spouseraceclean) +
+                       factor(year) + factor(logwagegroup) + factor(educ_4factor)  
+                     + factor(spouse_educ) + factor(spouselogwagegroup)
+                     , 
                     data = filter(df, year %in% c(2009,2010, 2011), sex == 1),
                     weights = wtsupp2)
-
-
-
 
 stargazer(myivobject1, myivobject2, myivobject3, myivobject4)
 
